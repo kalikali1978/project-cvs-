@@ -1,0 +1,66 @@
+import React, { useState, useEffect } from 'react';
+import { User, UserRole, CertificateRecord, AuditLog, Notification, RecordStatus } from './types';
+import { GHANA_UNIVERSITIES, MOCK_CERTIFICATES } from './constants';
+import LoginPage from './pages/Login';
+import UserDashboard from './pages/UserDashboard';
+import SchoolAdminDashboard from './pages/SchoolAdminDashboard';
+import MainAdminDashboard from './pages/MainAdminDashboard';
+import { ShieldCheck, LogOut } from 'lucide-react';
+
+const App: React.FC = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [certificates, setCertificates] = useState<CertificateRecord[]>(() => {
+    const saved = localStorage.getItem('certs');
+    return saved ? JSON.parse(saved) : MOCK_CERTIFICATES;
+  });
+  const [logs, setLogs] = useState<AuditLog[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('certs', JSON.stringify(certificates));
+  }, [certificates]);
+
+  const addLog = (action: string, details: string) => {
+    const newLog: AuditLog = {
+      id: Math.random().toString(36).substr(2, 9),
+      userId: currentUser?.id || 'system',
+      userName: currentUser?.name || 'Unauthenticated User',
+      action,
+      timestamp: new Date().toISOString(),
+      details
+    };
+    setLogs(prev => [newLog, ...prev]);
+  };
+
+  const handleLogout = () => {
+    addLog('LOGOUT', 'User logged out');
+    setCurrentUser(null);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {currentUser && (
+        <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+          <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-8 h-8 text-indigo-600" />
+              <span className="text-xl font-black text-gray-900">CertiVerify GH</span>
+            </div>
+            <button onClick={handleLogout} className="text-sm font-black text-red-600 px-4 py-2 hover:bg-red-50 rounded-xl">Sign Out</button>
+          </div>
+        </header>
+      )}
+      <main className="flex-grow bg-gray-50/50">
+        {!currentUser ? (
+          <LoginPage onLogin={setCurrentUser} onFailedAttempt={(role, d) => addLog('SECURITY_ALERT', d)} />
+        ) : currentUser.role === UserRole.USER ? (
+          <UserDashboard user={currentUser} certificates={certificates} onVerify={(c) => addLog('VERIFY', c.studentName)} onAttempt={(n) => addLog('VERIFY_FAIL', n)} />
+        ) : currentUser.role === UserRole.SCHOOL_ADMIN ? (
+          <SchoolAdminDashboard user={currentUser} certificates={certificates} onUpload={(c) => { setCertificates(p => [...p, ...c]); addLog('UPLOAD', 'New batch'); }} />
+        ) : (
+          <MainAdminDashboard user={currentUser} certificates={certificates} logs={logs} onStatusChange={(id, s) => setCertificates(p => p.map(c => c.id === id ? {...c, status: s} : c))} onBulkAdd={(c) => setCertificates(p => [...p, ...c])} />
+        )}
+      </main>
+    </div>
+  );
+};
+export default App;

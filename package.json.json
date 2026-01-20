@@ -1,0 +1,26 @@
+{
+  "name": "certiverify-ghana",
+  "version": "1.0.0",
+  "description": "Professional Certificate Verification Platform for Ghana",
+  "main": "index.tsx",
+  "dependencies": {
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "lucide-react": "^0.562.0",
+    "date-fns": "^4.1.0",
+    "@google/genai": "^1.37.0",
+    "qrcode.react": "^4.2.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^3.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

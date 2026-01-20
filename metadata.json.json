@@ -1,0 +1,5 @@
+{
+  "name": "CertiVerify Ghana",
+  "description": "Professional certificate verification platform featuring blockchain-backed verification, role-based dashboards, and AI automation.",
+  "requestFramePermissions": ["camera"]
+}
